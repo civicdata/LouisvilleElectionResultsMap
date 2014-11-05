@@ -167,9 +167,9 @@
 				<div class="cda-panel-heading">Votes</div>
 				<div class="cda-panel-body">
 					<div class="btn-group">
-						<button type="button" class="btn btn-default" id="combined">Combined</button>
-						<button type="button" class="btn btn-default" id="alison">Alison</button>
-						<button type="button" class="btn btn-default" id="mitch">Mitch</button>
+						<button type="button" class="btn btn-default" id="rep_demrat">Combined</button>
+						<button type="button" class="btn btn-default" id="perc_dem">Alison</button>
+						<button type="button" class="btn btn-default" id="perc_rep">Mitch</button>
 					</div>
 				</div>
 			</div>
@@ -199,8 +199,8 @@
     // available JSON data:  {"OBJECTID":1,"PRECINCT":"J138","FORMERPREC":null,"Shape_Area":5472512.60335,"Precinct_1":"J138","McCONNELL":56,"GRIMES":44,"PATTERSON":4,"rep_demrat":104,"rep_demrat":1.27,"perc_dem":42.3,"perc_rep":53.8,"dem_reprat":0.785714}
 
     breaks = {
-        'GRIMES': [35,25,15,10],
-        'McCONNELL': [35,25,15,10],
+        'perc_dem': [80,60,40,20],
+        'perc_rep': [80,60,40,20],
         'rep_demrat': [10,2,1.3,1.1,.9,.75,.5,.1,.0000000001]
     };
     
