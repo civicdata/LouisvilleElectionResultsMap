@@ -193,15 +193,15 @@
     }
     
     var map = L.map('map').setView([38.18395805672033, -85.660400390625], 11);
-    var selectedMetric = 'Total_Vote';
+    var selectedMetric = 'rep_demrat';
     var lastFeature;
     
-    // available JSON data:  {"OBJECTID":1,"PRECINCT":"J138","FORMERPREC":null,"Shape_Area":5472512.60335,"Precinct_1":"J138","McCONNELL":56,"GRIMES":44,"PATTERSON":4,"Total_Vote":104,"rep_demrat":1.27,"perc_dem":42.3,"perc_rep":53.8,"dem_reprat":0.785714}
+    // available JSON data:  {"OBJECTID":1,"PRECINCT":"J138","FORMERPREC":null,"Shape_Area":5472512.60335,"Precinct_1":"J138","McCONNELL":56,"GRIMES":44,"PATTERSON":4,"rep_demrat":104,"rep_demrat":1.27,"perc_dem":42.3,"perc_rep":53.8,"dem_reprat":0.785714}
 
     breaks = {
         'GRIMES': [35,25,15,10],
         'McCONNELL': [35,25,15,10],
-        'Total_Vote': [10,2,1.3,1.1,.9,.75,.5,.1,.01]
+        'rep_demrat': [10,2,1.3,1.1,.9,.75,.5,.1,.0000000001]
     };
     
     colors = [
@@ -211,17 +211,17 @@
         '#fdcc8a',
         '#fef0d9'
     ];
-    // blue to grey to red
+    // red to grey to blue
     colorsCombined = [
-        '#000077',
-        '#1202e9',
-        '#6659f1',
-        '#b3abee',
+        '#e4191c',
+        '#ff8b3b',
+        '#ffcb57',
+        '#ffffaa',
         '#d3d2d0',
-        '#ebbcba',
-        '#ed5353',
-        '#ee0000',
-        '#770000'
+        '#b9c9e2',
+        '#75a9d0',
+        '#0372a9',
+        '#1111cc'
     ];
     
     var layer = L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
@@ -256,7 +256,7 @@
       this._div.innerHTML = '<h4>2014 General Election</h4>';
       
       if(props) {
-          this._div.innerHTML += '<i>Precinct ' + props['Name'] + '</i><br />';
+          this._div.innerHTML += '<i>Precinct ' + props['PRECINCT'] + '</i><br />';
           if(props[selectedMetric] == null) {
               this._div.innerHTML += '<b>No Data<b/>';
               return;
@@ -314,18 +314,16 @@
     
     // get color depending on population density value
     function getColor(d) {
-        if ((selectedMetric == 'Total_Vote') ) {
+        if ((selectedMetric == 'rep_demrat') ) {
             //console.log(selectedMetric+"_"+ breaks[selectedMetric]+"_"+ breaks[selectedMetric].length+"_"+d);
             //console.log(d);
             for (var i = 0; i < breaks[selectedMetric].length; i++) {
                 //console.log(d+" - "+i+" - "+breaks[selectedMetric][i]);
                 if(d > breaks[selectedMetric][i]) {
-                    //console.log(colorsCombined[i]+" - "+d+" - "+selectedMetric);
-                    if (d == 999) {
-                         return '#d3d2d0';
-                    } else {
+                    console.log(colorsCombined[i]+" - "+d+" - "+selectedMetric);
+                    
                         return colorsCombined[i];
-                    }
+                    
                 }
             }
             return '#555555';
@@ -461,7 +459,7 @@
         labels = [],
         from, to, finalcolor;
 
-        if ((selectedMetric == 'Total_Vote')) {
+        if ((selectedMetric == 'rep_demrat')) {
             breaks[selectedMetric].reverse();    
             for (var i = 0; i < grades.length-1; i++) {
                 from = grades[i+1];
