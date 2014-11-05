@@ -522,7 +522,11 @@
             }
         }
         
-        div.innerHTML = labels.join('<br>');
+        if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
+            div.innerHTML = labels.join('<br>');
+        } else {
+            div.innerHTML = labels.join('%<br>');
+        }
         return div;
     };
 
