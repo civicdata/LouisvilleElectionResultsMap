@@ -8,4 +8,4 @@ Interactive map of Louisville election results.
 
 [Github Source Code](https://github.com/civicdata/LouisvilleElectionResultsMap)
 
-[Voter Precinct Turnout Map](http://projects.civicdataalliance.org/election-results/)
+[Election Results Map](http://projects.civicdataalliance.org/election-results/)

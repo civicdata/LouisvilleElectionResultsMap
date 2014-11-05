@@ -192,21 +192,21 @@
     }
     
     var map = L.map('map').setView([38.18395805672033, -85.660400390625], 11);
-    var selectedMetric = 'combined';
+    var selectedMetric = 'Total_Vote';
     var lastFeature;
     
     breaks = {
-        'alison': [35,25,15,10],
-        'mitch': [35,25,15,10],
-        'combined': [10,2,1.3,1.1,.9,.75,.5,.1,.01]
+        'GRIMES': [35,25,15,10],
+        'McCONNELL': [35,25,15,10],
+        'Total_Vote': [10,2,1.3,1.1,.9,.75,.5,.1,.01]
     };
     
     // Used in the info box code for lookups
     // available JSON data:  {"OBJECTID":1,"PRECINCT":"J138","FORMERPREC":null,"Shape_Area":5472512.60335,"Precinct_1":"J138","McCONNELL":56,"GRIMES":44,"PATTERSON":4,"Total_Vote":104,"rep_demrat":1.27,"perc_dem":42.3,"perc_rep":53.8,"dem_reprat":0.785714}
     displayValues = {
-        'combined': ['Total_Vote', 'Total_Vote'],
-        'alison': ['GRIMES', 'GRIMES'],
-        'mitch': ['McCONNELL', 'McCONNELL']
+        'Total_Vote': ['perc_dem', 'perc_rep'],
+        'GRIMES': ['GRIMES', 'GRIMES'],
+        'McCONNELL': ['McCONNELL', 'McCONNELL']
     };
     
     colors = [
@@ -231,7 +231,7 @@
     
     var layer = L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      attribution: 'Base style by Stamen | Built by the <a href="http://www.civicdataalliance.org//">Civic Data Alliance</a>'
+      attribution: 'Base style by Stamen | Built by the <a href="http://www.civicdataalliance.org/">Civic Data Alliance</a>'
     });
     
     layer.addTo(map);
@@ -319,13 +319,13 @@
     
     // get color depending on population density value
     function getColor(d) {
-        if ((selectedMetric == 'combined') ) {
+        if ((selectedMetric == 'Total_Vote') ) {
             //console.log(selectedMetric+"_"+ breaks[selectedMetric]+"_"+ breaks[selectedMetric].length+"_"+d);
-            //console.log(d+" - "+d);
+            //console.log(d);
             for (var i = 0; i < breaks[selectedMetric].length; i++) {
                 //console.log(d+" - "+i+" - "+breaks[selectedMetric][i]);
                 if(d > breaks[selectedMetric][i]) {
-                    //console.log(colorsCombined[i]+" - "+d+" - "+selectedMetric);
+                    console.log(colorsCombined[i]+" - "+d+" - "+selectedMetric);
                     if (d == 999) {
                          return '#d3d2d0';
                     } else {
@@ -465,7 +465,7 @@
         labels = [],
         from, to, finalcolor;
 
-        if ((selectedMetric == 'combined')) {
+        if ((selectedMetric == 'Total_Vote')) {
             breaks[selectedMetric].reverse();    
             for (var i = 0; i < grades.length-1; i++) {
                 from = grades[i+1];
