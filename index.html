@@ -274,7 +274,21 @@
               this._div.innerHTML += '<b>No Data<b/>';
               return;
           }
-          this._div.innerHTML += '<table border=0 style="padding: 2px;"><tr><td>&nbsp;</td><td align="right">Votes</td></tr> <tr><td><b>Alison</b></td><td align="right">' + props['GRIMES']  + '</td></tr> <tr><td><b>Mitch</b></td><td align="right">' + props['McCONNELL']  + '</td></tr> </table>';
+
+          var grimes = '';
+          var mcconnell = '';
+          var header = 'Votes';
+
+          if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
+              grimes = props['GRIMES'] + ' (' + props['perc_dem'] + '%)';
+              mcconnell = props['McCONNELL'] + ' (' + props['perc_rep'] + '%)';
+          } else {
+              grimes =  props['perc_dem'] + '% (' + props['GRIMES'] + ')';
+              mcconnell = props['perc_rep'] + '% (' + props['McCONNELL'] + ')';
+              header = 'Percentage';
+          }
+
+          this._div.innerHTML += '<table border=0 style="padding: 3px; border-spacing: 3px; border-collapse: separate;"><tr><td>&nbsp;</td><td align="left">' + header + '</td></tr> <tr><td><b>Alison </b></td><td align="right">' + grimes  + '</td></tr> <tr><td><b>Mitch</b></td><td align="right">' + mcconnell + '</td></tr> </table>';
          
       } else {
           this._div.innerHTML +=  (isTouchDevice() ? 'Click' : 'Hover over or double<br>click') + ' a precinct.'
