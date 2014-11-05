@@ -1,0 +1,536 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Louisville, Ky. May 2014 Voter Turnout Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="user-scalable=no,width=700">
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="css/Control.Geocoder.css" />
+  <style>
+    html, body {
+      height: 100%;
+    }
+  
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+    
+    .info h4 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+
+    .legend {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+    }
+    
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.9;
+    }
+    
+    #attribution {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+      width: 114px;
+      height: 59px;
+      position: fixed;
+      bottom: 20px;
+      left: 10px;
+      border: 1px solid #999;
+    }
+    
+    #attribution a {
+      text-indent:-9999px;
+      display:block;
+      background-image:url('./img/CDAlogo.png');
+      width: 112px;
+      height: 57px;
+      cursor: hand;
+    }
+    
+    @media only screen and (-webkit-min-device-pixel-ratio: 2),
+        only screen and (   min--moz-device-pixel-ratio: 2),
+        only screen and (     -o-min-device-pixel-ratio: 2/1),
+        only screen and (        min-device-pixel-ratio: 2),
+        only screen and (                min-resolution: 192dpi),
+        only screen and (                min-resolution: 2dppx) {
+      /* retina display. dpr 2 */
+      #attribution a {
+        background-image:url('./img/CDAlogo@2x.png');
+        background-size: 112px 57px;
+      }
+    }
+
+    @media only screen and (-webkit-min-device-pixel-ratio: 3),
+    only screen and (min--moz-device-pixel-ratio: 3),
+    only screen and (-o-min-device-pixel-ratio: 3/1),
+    only screen and (min-device-pixel-ratio: 3),
+    only screen and (min-resolution: 3dppx){
+      /* dpr 3 */
+      #attribution a {
+        background-image:url('./img/CDAlogo@3x.png');
+        background-size: 112px 57px;
+      }
+    }
+    
+    #controls { 
+        position: absolute;
+        top: 3px;
+        left: 50px;
+    }
+    
+    #controls .cda-panel {
+        float: left;
+        margin: 5px;
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
+        padding: 5px;
+    }
+    
+    #controls .cda-panel-heading {
+        font-weight: bold;
+    }
+    
+    @media screen and (max-width: 850px) { 
+        #controls {
+            position: relative;
+        }
+        #controls-inner { 
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 0 !important;
+        }
+        #attribution {
+            position: absolute;
+            left: 50px;
+            top: 12px;
+        }
+    }
+        
+    @media screen and (max-width: 650px) { 
+        #controls-inner {
+            width: 300px;
+            bottom: 20px !important;
+        }
+        
+        #controls .cda-panel {
+            margin: 2px;
+        }
+    }
+    
+    @media only screen 
+        and (min-device-width: 320px) 
+        and (max-device-width: 568px) 
+        and (orientation: landscape) {
+        #attribution {
+            display: none;
+        }
+    }
+    
+    .btn {
+        padding: 5px;
+    }
+    
+    
+    
+  </style>
+</head>
+<body>
+    <div id="map"></div>
+	<div id="controls">
+		<div id="controls-inner">
+
+			<div class="cda-panel cda-panel-default">
+				<div class="cda-panel-heading">Votes</div>
+				<div class="cda-panel-body">
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" id="combined">Combined</button>
+						<button type="button" class="btn btn-default" id="alison">Alison</button>
+						<button type="button" class="btn btn-default" id="mitch">Mitch</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+  
+    <div id="attribution"><a href="http://www.civicdataalliance.org/louisville-voter-precinct-turnout/" title="Map Created by Civic Data Alliance. Click for Details."></a></div>
+  
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script type="text/javascript" src="js/precincts.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script src="js/Control.Geocoder.CDA.js"></script>
+  <script type="text/javascript">
+
+    function isTouchDevice() {
+        if(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+            return true;
+        }
+        return false;
+    }
+    
+    var map = L.map('map').setView([38.18395805672033, -85.660400390625], 11);
+    var selectedMetric = 'combined';
+    var lastFeature;
+    
+    breaks = {
+        'alison': [35,25,15,10],
+        'mitch': [35,25,15,10],
+        'combined': [10,2,1.3,1.1,.9,.75,.5,.1,.01]
+    };
+    
+    // Used in the info box code for lookups
+    // available JSON data:  {"OBJECTID":1,"PRECINCT":"J138","FORMERPREC":null,"Shape_Area":5472512.60335,"Precinct_1":"J138","McCONNELL":56,"GRIMES":44,"PATTERSON":4,"Total_Vote":104,"rep_demrat":1.27,"perc_dem":42.3,"perc_rep":53.8,"dem_reprat":0.785714}
+    displayValues = {
+        'combined': ['Total_Vote', 'Total_Vote'],
+        'alison': ['GRIMES', 'GRIMES'],
+        'mitch': ['McCONNELL', 'McCONNELL']
+    };
+    
+    colors = [
+        '#b30000',	
+        '#e34a33',
+        '#fc8d59',
+        '#fdcc8a',
+        '#fef0d9'
+    ];
+    // blue to grey to red
+    colorsCombined = [
+        '#000077',
+        '#1202e9',
+        '#6659f1',
+        '#b3abee',
+        '#d3d2d0',
+        '#ebbcba',
+        '#ed5353',
+        '#ee0000',
+        '#770000'
+    ];
+    
+    var layer = L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'Base style by Stamen | Built by the <a href="http://www.civicdataalliance.org//">Civic Data Alliance</a>'
+    });
+    
+    layer.addTo(map);
+
+    L.Control.geocoder({
+      geocoder: L.Control.Geocoder.nominatim({
+          geocodingQueryParams: {
+            bounded: 1, 
+            viewbox: "-85.9,38.3,-85.5,38.1," // bound to Louisville bbox
+          }
+        }),
+      collapsed: false,
+      placeholder: "Search location..",
+      position: "topright" // change when finishing up UI
+    }).addTo(map);
+
+    // control that shows state info on hover
+    var info = L.control();
+
+    info.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+    };
+
+    info.update = function (props) {
+      this._div.innerHTML = '<h4>2014 General Election</h4>';
+      
+      if(props) {
+          this._div.innerHTML += '<i>Precinct ' + props['Name'] + '</i><br />';
+          if(props[selectedMetric] == null) {
+              this._div.innerHTML += '<b>No Data<b/>';
+              return;
+          }
+          this._div.innerHTML += '<table border=0 style="padding: 2px;"><tr><td>&nbsp;</td><td align="right">Votes</td></tr> <tr><td><b>Alison</b></td><td align="right">' + props['GRIMES']  + '</td></tr> <tr><td><b>Mitch</b></td><td align="right">' + props['McCONNELL']  + '</td></tr> </table>';
+         
+      } else {
+          this._div.innerHTML +=  (isTouchDevice() ? 'Click' : 'Hover over or double<br>click') + ' a precinct.'
+      }
+    };
+    
+    function fixPercent(percent) {
+        if (percent == 'Infinity') {
+            percent = 'All Dem';
+        } else if (isNaN(percent)) {
+            percent = 'All Rep';
+        } else if (percent == 1) {
+            percent = 'Even';
+        } else if (percent == 999) {
+            percent = 'None';
+        } else {
+            percent = percent+'x';
+        }
+        return percent;
+    }
+    
+    
+    function Difference(demRep) {
+        var diff, color, divider, top;
+         if ((demRep) == 999) { // more reps
+            color = 'black';
+        } else if ((demRep) > 1) { // more dems
+            color = 'blue';
+        } else if ((demRep) < 1) { // more reps
+            color = 'red';
+            demRep = 1/demRep;
+        } else { 
+            diff = -1;
+            color = "black";
+        }
+        //console.log (demRep+' - ');
+        if (diff != -1) {
+            percent = Math.round(demRep* 10 ) / 10;
+            
+            percent = fixPercent(percent);
+        } else {
+            percent = 'None';
+        }
+        
+        return '<span style="color: '+ color +';">'+ percent +"</span>";
+    }
+    
+
+    info.addTo(map);
+    
+    // get color depending on population density value
+    function getColor(d) {
+        if ((selectedMetric == 'combined') ) {
+            //console.log(selectedMetric+"_"+ breaks[selectedMetric]+"_"+ breaks[selectedMetric].length+"_"+d);
+            //console.log(d+" - "+d);
+            for (var i = 0; i < breaks[selectedMetric].length; i++) {
+                //console.log(d+" - "+i+" - "+breaks[selectedMetric][i]);
+                if(d > breaks[selectedMetric][i]) {
+                    //console.log(colorsCombined[i]+" - "+d+" - "+selectedMetric);
+                    if (d == 999) {
+                         return '#d3d2d0';
+                    } else {
+                        return colorsCombined[i];
+                    }
+                }
+            }
+            return '#555555';
+        } else {
+            for (var i = 0; i < breaks[selectedMetric].length; i++) {
+                if(d > breaks[selectedMetric][i]) {
+                    return colors[i];
+                }
+            }
+            return '#FFEDA0';
+        }
+        
+    }
+
+    
+
+    function resetHighlight(e) {
+      geojson.resetStyle(e.target);
+      info.update();
+    }
+    
+    function highlightFeature(e) {
+      if(lastFeature) {
+          resetHighlight(lastFeature);
+      }
+      
+      lastFeature = e;
+      
+      var layer = e.target;
+
+      layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.9
+      });
+
+      if (!L.Browser.ie && !L.Browser.opera) {
+        //layer.bringToFront();
+      }
+
+      info.update(layer.feature.properties);
+    }
+
+    var geojson;
+
+    function zoomToFeature(e) {
+      map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+      layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: highlightFeature,
+        dblclick: zoomToFeature
+      });
+    }
+
+    function updateStyle() {
+        geojson.setStyle(style);
+        map.removeControl(legend);
+        legend.addTo(map);
+    }
+    
+    function setButtonStatus() {
+        $('#controls button').removeClass('active');
+        $('#controls button#' + selectedMetric).addClass('active');
+    }
+
+    function style(feature) {
+      return {
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        //dashArray: '3',
+        fillOpacity: 0.9,
+        fillColor: getColor(feature.properties[selectedMetric])
+      };
+    }
+    
+    geojson = L.geoJson(precincts, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+    
+    
+    function styleLocation (feature) {
+        var theColor;
+        if (feature.properties.totReg > 3000) {
+            theColor = "#555";
+        } else if (feature.properties.totReg > 2500) {
+            theColor = "#777";
+        } else if (feature.properties.totReg > 2000) {
+            theColor = "#999";
+        } else if (feature.properties.totReg > 1500) {
+            theColor = "#bbb";
+        } else if (feature.properties.totReg > 1000) {
+            theColor = "#ddd";
+        } else {
+            theColor = "#eee";
+        }
+        return {
+            radius: 7,
+            fillColor: theColor,
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+    }
+
+    
+
+    function flipValue(demRep) {
+        if ((demRep) > 1) { // more dems
+            demRep = demRep;
+        } else  { // more reps
+           
+            demRep = 1/demRep;
+        }
+        return Math.round(demRep* 10 ) / 10;
+    }
+
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0].concat(breaks[selectedMetric].reverse()),
+        labels = [],
+        from, to, finalcolor;
+
+        if ((selectedMetric == 'combined')) {
+            breaks[selectedMetric].reverse();    
+            for (var i = 0; i < grades.length-1; i++) {
+                from = grades[i+1];
+                to = grades[i + 2];
+                
+                finalcolor = getColor(from + 1);
+                //console.log('legend ' + from+" - "+to+" - "+(from+1)+" - "+finalcolor+" - "+colorsCombined[i]+" - "+i+" - "+grades.length);
+                finalRange = '<i style="background:' + colorsCombined[i] + '"></i> '; 
+                
+                if (i==0) {
+                    finalRange +=  flipValue(grades[i+2]) + '+';
+                } else if (i == (grades.length-2)) {
+                    finalRange += flipValue(from) + '+';
+                } else {
+                    if ((from < 1) && (to < 1)) {
+                        finalRange += flipValue(to) +  '&ndash;' + flipValue(from);
+                    } else {
+                        finalRange += flipValue(from) +  '&ndash;' + flipValue(to);
+                    }
+                }
+                
+                
+                labels.push(finalRange);
+            }
+            
+        } else {
+            breaks[selectedMetric].reverse();    
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+
+                labels.push(
+                    '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                    from + (to ? '&ndash;' + to : '+'));
+            }
+        }
+        
+        div.innerHTML = labels.join('<br>');
+        return div;
+    };
+
+    legend.addTo(map);
+    
+    $(function() {
+        $('#controls button').on('click', function(event) {
+            selectedMetric = event.target.id;
+            updateStyle();
+            setButtonStatus();
+        });
+        
+        setButtonStatus();
+    });
+
+  </script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-3244073-15', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</body>
+</html>
