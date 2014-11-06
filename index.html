@@ -164,14 +164,14 @@
 		<div id="controls-inner">
 
 			<div class="cda-panel cda-panel-default">
-				<div class="cda-panel-heading">Votes</div>
+				<div class="cda-panel-heading">2014 General Election Results</div>
 				<div class="cda-panel-body">
 					<div class="btn-group">
 						<button type="button" class="btn btn-default" id="rep_demrat">Combined</button>
-						<button type="button" class="btn btn-default" id="perc_dem">Alison</button>
-						<button type="button" class="btn btn-default" id="perc_rep">Mitch</button>
-            <button type="button" class="btn btn-default" id="GRIMES">Alison Absolute</button>
-            <button type="button" class="btn btn-default" id="McCONNELL">Mitch Absolute</button>
+						<button type="button" class="btn btn-default" id="perc_dem">Alison %</button>
+						<button type="button" class="btn btn-default" id="perc_rep">Mitch %</button>
+            <button type="button" class="btn btn-default" id="GRIMES">Alison Votes</button>
+            <button type="button" class="btn btn-default" id="McCONNELL">Mitch Votes</button>
 					</div>
 				</div>
 			</div>
@@ -209,23 +209,21 @@
     };
     
     colors = [
-        '#b30000',	
-        '#e34a33',
-        '#fc8d59',
-        '#fdcc8a',
-        '#fef0d9'
+        '#880000',	
+        '#b2182b',
+        '#d6604d',
+        '#f4a582',
+        '#fddbc7'
+    ];
+	colorsDem = [
+        '#000088',	
+        '#2166ac',
+        '#4393c3',
+        '#92c5de',
+        '#d1e5f0'
     ];
     // red to grey to blue
     colorsCombined = [
-        // '#e4191c',
-        // '#ff8b3b',
-        // '#ffcb57',
-        // '#ffffaa',
-        // '#d3d2d0',
-        // '#b9c9e2',
-        // '#75a9d0',
-        // '#0372a9',
-        // '#1111cc'
         '#b2182b',
         '#d6604d',
         '#f4a582',
@@ -266,10 +264,10 @@
     };
 
     info.update = function (props) {
-      this._div.innerHTML = '<h4>2014 General Election</h4>';
+      this._div.innerHTML = '';
       
       if(props) {
-          this._div.innerHTML += '<i>Precinct ' + props['PRECINCT'] + '</i><br />';
+          this._div.innerHTML += '<h4>Precinct ' + props['PRECINCT'] + '</h4>';
           if(props[selectedMetric] == null) {
               this._div.innerHTML += '<b>No Data<b/>';
               return;
@@ -277,88 +275,57 @@
 
           var grimes = '';
           var mcconnell = '';
-          var header = 'Votes (Percentage)';
+          var header = '<em>Votes</em></td><td align="right"><em>Percentage</em>';
+		  var advantage;
 
           if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
-              grimes = props['GRIMES'] + ' (' + props['perc_dem'] + '%)';
-              mcconnell = props['McCONNELL'] + ' (' + props['perc_rep'] + '%)';
+              grimes = props['GRIMES'] + '</td><td align="right">(' + props['perc_dem'] + '%)';
+              mcconnell = props['McCONNELL'] + '</td><td align="right">(' + props['perc_rep'] + '%)';
           } else {
-              grimes =  props['perc_dem'] + '% (' + props['GRIMES'] + ')';
-              mcconnell = props['perc_rep'] + '% (' + props['McCONNELL'] + ')';
-              header = 'Percentage (Votes)';
+              grimes =  props['perc_dem'] + '%</td><td align="right">(' + props['GRIMES'] + ')';
+              mcconnell = props['perc_rep'] + '%</td><td align="right">(' + props['McCONNELL'] + ')';
+              header = '<em>Percentage</em></td><td align="right"><em>Votes</em>';
           }
 
-          this._div.innerHTML += '<table border=0 style="padding: 3px; border-spacing: 3px; border-collapse: separate;"><tr><td>&nbsp;</td><td align="left">' + header + '</td></tr> <tr><td><b>Alison </b></td><td align="right">' + grimes  + '</td></tr> <tr><td><b>Mitch</b></td><td align="right">' + mcconnell + '</td></tr> </table>';
+		  if (props['rep_demrat'] > 1) {
+			advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
+		  } else {
+			advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
+		  }
+          this._div.innerHTML += '<table border=0 style="padding: 3px; border-spacing: 3px; border-collapse: separate;"><tr><td>&nbsp;</td><td align="left">' + header + '</td></tr> <tr><td><b>Alison </b></td><td align="right">' + grimes  + '</td></tr> <tr><td><b>Mitch </b></td><td align="right">' + mcconnell + '</td></tr> <tr><td colspan="3" align="center">'+ advantage +'</td></tr></table>';
          
       } else {
           this._div.innerHTML +=  (isTouchDevice() ? 'Click' : 'Hover over or double<br>click') + ' a precinct.'
       }
     };
-    
-    function fixPercent(percent) {
-        if (percent == 'Infinity') {
-            percent = 'All Dem';
-        } else if (isNaN(percent)) {
-            percent = 'All Rep';
-        } else if (percent == 1) {
-            percent = 'Even';
-        } else if (percent == 999) {
-            percent = 'None';
-        } else {
-            percent = percent+'x';
-        }
-        return percent;
-    }
-    
-    
-    function Difference(demRep) {
-        var diff, color, divider, top;
-         if ((demRep) == 999) { // more reps
-            color = 'black';
-        } else if ((demRep) > 1) { // more dems
-            color = 'blue';
-        } else if ((demRep) < 1) { // more reps
-            color = 'red';
-            demRep = 1/demRep;
-        } else { 
-            diff = -1;
-            color = "black";
-        }
-        //console.log (demRep+' - ');
-        if (diff != -1) {
-            percent = Math.round(demRep* 10 ) / 10;
-            
-            percent = fixPercent(percent);
-        } else {
-            percent = 'None';
-        }
-        
-        return '<span style="color: '+ color +';">'+ percent +"</span>";
-    }
-    
 
     info.addTo(map);
     
     // get color depending on population density value
     function getColor(d) {
         if ((selectedMetric == 'rep_demrat') ) {
-            //console.log(selectedMetric+"_"+ breaks[selectedMetric]+"_"+ breaks[selectedMetric].length+"_"+d);
-            //console.log(d);
+            //console.log(selectedMetric+"_"+d);
             for (var i = 0; i < breaks[selectedMetric].length; i++) {
-                //console.log(d+" - "+i+" - "+breaks[selectedMetric][i]);
-                if(d > breaks[selectedMetric][i]) {
-                        return colorsCombined[i];
-                    
-                }
+				if(d > breaks[selectedMetric][i]) {
+					return colorsCombined[i];
+				}
             }
-            return colorsCombined[8]
-        } else {
+            return colorsCombined[8];	
+		} else {
             for (var i = 0; i < breaks[selectedMetric].length; i++) {
                 if(d > breaks[selectedMetric][i]) {
-                    return colors[i];
+					if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
+						return colorsDem[i];
+					} else {
+                    	return colors[i];
+					}
                 }
             }
-            return '#FFEDA0';
+			if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
+            	return '#d1e5f0';
+			} else {
+				return '#fddbc7';
+			}
         }
         
     }
@@ -420,51 +387,29 @@
     }
 
     function style(feature) {
-	  //console.log(feature.properties[selectedMetric]);
-      return {
-        weight: 1,
-        opacity: 1,
-        color: 'white',
-        //dashArray: '3',
-        fillOpacity: 0.9,
-        fillColor: getColor(feature.properties[selectedMetric])
-      };
+		//console.log(feature.properties[selectedMetric]);
+		var finalcolor;
+		//if (feature.properties.PRECINCT == 'I142' && selectedMetric == 'rep_demrat') { // hack for odd district data
+		//	return '#b2182b';
+		//} else {
+			finalcolor = getColor(feature.properties[selectedMetric]);
+		//}
+		
+		return {
+			weight: 1,
+			opacity: 1,
+			color: 'white',
+			//dashArray: '3',
+			fillOpacity: 0.9,
+			fillColor: finalcolor
+		};
     }
     
     geojson = L.geoJson(precincts, {
       style: style,
       onEachFeature: onEachFeature
     }).addTo(map);
-
-    	
     
-    function styleLocation (feature) {
-        var theColor;
-        if (feature.properties.totReg > 3000) {
-            theColor = "#555";
-        } else if (feature.properties.totReg > 2500) {
-            theColor = "#777";
-        } else if (feature.properties.totReg > 2000) {
-            theColor = "#999";
-        } else if (feature.properties.totReg > 1500) {
-            theColor = "#bbb";
-        } else if (feature.properties.totReg > 1000) {
-            theColor = "#ddd";
-        } else {
-            theColor = "#eee";
-        }
-        return {
-            radius: 7,
-            fillColor: theColor,
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        };
-    }
-
-    
-
     function flipValue(demRep) {
         if ((demRep) > 1) { // more dems
             demRep = demRep;
@@ -521,10 +466,11 @@
                     from + (to ? '&ndash;' + to : '+'));
             }
         }
-        
         if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
             div.innerHTML = labels.join('<br>');
-        } else {
+        } else if(selectedMetric == 'rep_demrat') {
+	        div.innerHTML = labels.join('x<br>') + 'x';
+	    } else {
             div.innerHTML = labels.join('%<br>') + '%';
         }
         return div;
