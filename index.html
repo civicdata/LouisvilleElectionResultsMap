@@ -163,24 +163,24 @@
 </head>
 <body>
     <div id="map"></div>
-	<div id="controls">
-		<div id="controls-inner">
+  <div id="controls">
+    <div id="controls-inner">
 
-			<div class="cda-panel cda-panel-default">
-				<div class="cda-panel-heading">McConnell/Grimes 2014 General Election Results</div>
-				<div class="cda-panel-body">
-					<div class="btn-group">
-						<button type="button" class="btn btn-default" id="rep_demrat">Combined</button>
-						<button type="button" class="btn btn-default" id="perc_dem">Alison %</button>
-						<button type="button" class="btn btn-default" id="perc_rep">Mitch %</button>
+      <div class="cda-panel cda-panel-default">
+        <div class="cda-panel-heading">McConnell/Grimes 2014 General Election Results</div>
+        <div class="cda-panel-body">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default" id="rep_demrat">Combined</button>
+            <button type="button" class="btn btn-default" id="perc_dem">Alison %</button>
+            <button type="button" class="btn btn-default" id="perc_rep">Mitch %</button>
             <button type="button" class="btn btn-default" id="GRIMES">Alison Votes</button>
             <button type="button" class="btn btn-default" id="McCONNELL">Mitch Votes</button>
-					</div>
-				</div>
-			</div>
-			
-		</div>
-	</div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
   
     <div id="attribution"><a href="http://www.civicdataalliance.org/louisville-voter-precinct-turnout/" title="Map Created by Civic Data Alliance. Click for Details."></a></div>
   
@@ -212,14 +212,14 @@
     };
     
     colors = [
-        '#880000',	
+        '#880000',  
         '#b2182b',
         '#d6604d',
         '#f4a582',
         '#fddbc7'
     ];
-	colorsDem = [
-        '#000088',	
+  colorsDem = [
+        '#000088',  
         '#2166ac',
         '#4393c3',
         '#92c5de',
@@ -279,7 +279,7 @@
           var grimes = '';
           var mcconnell = '';
           var header = '<em>Votes</em></td><td align="right"><em>Percentage</em>';
-		  var advantage;
+      var advantage;
 
           if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
               grimes = props['GRIMES'] + '</td><td align="right">(' + props['perc_dem'] + '%)';
@@ -290,11 +290,19 @@
               header = '<em>Percentage</em></td><td align="right"><em>Votes</em>';
           }
 
-		  if (props['rep_demrat'] > 1) {
-			advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
-		  } else {
-			advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
-		  }
+      if (props['rep_demrat'] > 1) {
+        advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
+      } else if (props['dem_reprat'] > 1) {
+        advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
+      } else if (props['rep_demrat'] == 1 && props['dem_reprat'] == 1) {
+        advantage = 'No advantage';
+      } else {
+          if(props['GRIMES'] == 0) { 
+            advantage = 100 + '% <span style="color: #b2182b;">Republican</span> advantage';
+          } else {
+            advantage = 100 + '% <span style="color: #2166ac;">Democrat</span> advantage';
+          }
+      }
           this._div.innerHTML += '<table border=0 style="padding: 3px; border-spacing: 3px; border-collapse: separate;"><tr><td>&nbsp;</td><td align="left">' + header + '</td></tr> <tr><td><b>Alison </b></td><td align="right">' + grimes  + '</td></tr> <tr><td><b>Mitch </b></td><td align="right">' + mcconnell + '</td></tr> <tr><td colspan="3" align="center">'+ advantage +'</td></tr></table>';
          
       } else {
@@ -305,30 +313,37 @@
     info.addTo(map);
     
     // get color depending on population density value
-    function getColor(d) {
+    function getColor(d, props) {
         if ((selectedMetric == 'rep_demrat') ) {
-            //console.log(selectedMetric+"_"+d);
-            for (var i = 0; i < breaks[selectedMetric].length; i++) {
-				if(d > breaks[selectedMetric][i]) {
-					return colorsCombined[i];
-				}
+          if(props != undefined && props['rep_demrat'] == 0 && props['dem_reprat'] == 0) {
+            if(props['GRIMES'] == 0) { 
+              d = 100/1;
+            } else {
+              d = 1/100;
             }
-            return colorsCombined[8];	
-		} else {
-            for (var i = 0; i < breaks[selectedMetric].length; i++) {
-                if(d > breaks[selectedMetric][i]) {
-					if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
-						return colorsDem[i];
-					} else {
-                    	return colors[i];
-					}
-                }
+          }
+          //console.log(selectedMetric+"_"+d);
+          for (var i = 0; i < breaks[selectedMetric].length; i++) {
+            if(d > breaks[selectedMetric][i]) {
+             return colorsCombined[i];
             }
-			if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
-            	return '#d1e5f0';
-			} else {
-				return '#fddbc7';
-			}
+          }
+          return colorsCombined[8]; 
+        } else {
+          for (var i = 0; i < breaks[selectedMetric].length; i++) {
+            if(d > breaks[selectedMetric][i]) {
+              if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
+                return colorsDem[i];
+              } else {
+                return colors[i];
+              }
+            }
+          }
+      if (selectedMetric == 'GRIMES' || selectedMetric == 'perc_dem' ) {
+              return '#d1e5f0';
+      } else {
+        return '#fddbc7';
+      }
         }
         
     }
@@ -390,22 +405,22 @@
     }
 
     function style(feature) {
-		//console.log(feature.properties[selectedMetric]);
-		var finalcolor;
-		//if (feature.properties.PRECINCT == 'I142' && selectedMetric == 'rep_demrat') { // hack for odd district data
-		//	return '#b2182b';
-		//} else {
-			finalcolor = getColor(feature.properties[selectedMetric]);
-		//}
-		
-		return {
-			weight: 1,
-			opacity: 1,
-			color: 'white',
-			//dashArray: '3',
-			fillOpacity: 0.9,
-			fillColor: finalcolor
-		};
+    //console.log(feature.properties[selectedMetric]);
+    var finalcolor;
+    //if (feature.properties.PRECINCT == 'I142' && selectedMetric == 'rep_demrat') { // hack for odd district data
+    //  return '#b2182b';
+    //} else {
+      finalcolor = getColor(feature.properties[selectedMetric], feature.properties);
+    //}
+    
+    return {
+      weight: 1,
+      opacity: 1,
+      color: 'white',
+      //dashArray: '3',
+      fillOpacity: 0.9,
+      fillColor: finalcolor
+    };
     }
     
     geojson = L.geoJson(precincts, {
@@ -472,8 +487,8 @@
         if(selectedMetric == 'McCONNELL' || selectedMetric == 'GRIMES') {
             div.innerHTML = labels.join('<br>');
         } else if(selectedMetric == 'rep_demrat') {
-	        div.innerHTML = labels.join('x<br>') + 'x';
-	    } else {
+          div.innerHTML = labels.join('x<br>') + 'x';
+      } else {
             div.innerHTML = labels.join('%<br>') + '%';
         }
         return div;
