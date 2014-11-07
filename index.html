@@ -290,12 +290,12 @@
               header = '<em>Percentage</em></td><td align="right"><em>Votes</em>';
           }
 
-      if (props['rep_demrat'] > 1) {
-        advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
-      } else if (props['dem_reprat'] > 1) {
-        advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
-      } else if ((props['rep_demrat'] == 1 && props['dem_reprat'] == 1) || props['McCONNELL'] == 0 && props['GRIMES'] == 0) {
+      if ((props['rep_demrat'] == 1 && props['dem_reprat'] == 1) || props['McCONNELL'] == 0 && props['GRIMES'] == 0) {
         advantage = 'No advantage';
+      } else if (props['dem_reprat'] >= 1) {
+        advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
+      } else  if (props['rep_demrat'] >= 1) {
+        advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
       } else {
           if(props['GRIMES'] == 0) { 
             advantage = 100 + '% <span style="color: #b2182b;">Republican</span> advantage';
