@@ -294,7 +294,7 @@
         advantage = Math.round(props['rep_demrat']*10)/10 + 'x <span style="color: #b2182b;">Republican</span> advantage';
       } else if (props['dem_reprat'] > 1) {
         advantage = Math.round(props['dem_reprat']*10)/10 + 'x <span style="color: #2166ac;">Democrat</span> advantage';
-      } else if (props['rep_demrat'] == 1 && props['dem_reprat'] == 1) {
+      } else if ((props['rep_demrat'] == 1 && props['dem_reprat'] == 1) || props['McCONNELL'] == 0 && props['GRIMES'] == 0) {
         advantage = 'No advantage';
       } else {
           if(props['GRIMES'] == 0) { 
@@ -316,11 +316,16 @@
     function getColor(d, props) {
         if ((selectedMetric == 'rep_demrat') ) {
           if(props != undefined && props['rep_demrat'] == 0 && props['dem_reprat'] == 0) {
-            if(props['GRIMES'] == 0) { 
+            if(props['McCONNELL'] == 0 && props['GRIMES'] == 0) {
+              d = 1;
+            }
+            else if(props['GRIMES'] == 0) { 
               d = 100/1;
             } else {
               d = 1/100;
             }
+          } else if(props != undefined && props['McCONNELL'] == 0 && props['GRIMES'] == 0) {
+            d = 1;
           }
           //console.log(selectedMetric+"_"+d);
           for (var i = 0; i < breaks[selectedMetric].length; i++) {
